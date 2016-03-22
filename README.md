@@ -1,3 +1,3 @@
-# A MEAN stack example
+# Final Masters project CMPE295B
 
 # HealthMG_WebApp
