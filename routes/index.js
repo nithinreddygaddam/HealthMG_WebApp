@@ -3,6 +3,9 @@ var router = express.Router();
 var jwt = require('express-jwt');
 var passport = require('passport');
 
+var http = require('http').Server(express);
+var io = require('socket.io')(http);
+
 /* GET home page. */
 router.get('/', function(req, res) {
   res.render('index', { title: 'Express' });
@@ -13,9 +16,36 @@ var mongoose = require('mongoose');
 //var Post = mongoose.model('Post');
 //var Comment = mongoose.model('Comment');
 var User = mongoose.model('User');
+var HeartRate = mongoose.model('HeartRate');
 
 var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
+http.listen(4000, function(){
+  console.log('Listening on *:4000');
+});
+
+io.on('connection', function(clientSocket){
+  console.log('a user connected');
+
+  clientSocket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+
+    clientSocket.on('heartRate', function(time, date, hr){
+        var heartR = new HeartRate();
+
+        heartR.time = time;
+        heartR.date = date;
+        heartR.heartRate = hr;
+        console.log(hr);
+        heartR.save(function (err){
+            if(err){ return next(err); }
+
+
+        });
+    });
+
+});
 //router.get('/posts', function(req, res, next) {
 //  Post.find(function(err, posts){
 //    if(err){ return next(err); }
@@ -134,6 +164,7 @@ router.post('/register', function(req, res, next){
   var user = new User();
 
   user.username = req.body.username;
+    user.
 
   user.setPassword(req.body.password)
 

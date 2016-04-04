@@ -7,11 +7,15 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
 mongoose.connect('mongodb://localhost/news');
 
 //require('./models/Posts');
 //require('./models/Comments');
 require('./models/Users');
+require('./models/HeartRate');
 
 require('./config/passport');
 
