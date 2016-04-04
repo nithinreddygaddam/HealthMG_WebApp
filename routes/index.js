@@ -30,7 +30,7 @@ io.on('connection', function(clientSocket){
   clientSocket.on('disconnect', function(){
     console.log('user disconnected');
   });
-
+//save hear rate to database
     clientSocket.on('heartRate', function(time, date, hr){
         var heartR = new HeartRate();
 
