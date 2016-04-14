@@ -1,4 +1,4 @@
-angular.module('flapperNews', ['ui.router'])
+angular.module('healthMG', ['ui.router'])
 .config([
 '$stateProvider',
 '$urlRouterProvider',
@@ -8,7 +8,7 @@ function($stateProvider, $urlRouterProvider) {
     .state('home', {
       url: '/home',
       templateUrl: '/home.html',
-      controller: 'MainCtrl',
+      controller: 'MainCtrl'
       //resolve: {
       //  postPromise: ['posts', function(posts){
       //    return posts.getAll();
@@ -100,10 +100,10 @@ function($stateProvider, $urlRouterProvider) {
 .factory('auth', ['$http', '$window', '$rootScope', function($http, $window, $rootScope){
    var auth = {
     saveToken: function (token){
-      $window.localStorage['flapper-news-token'] = token;
+      $window.localStorage['health-mg-token'] = token;
     },
     getToken: function (){
-      return $window.localStorage['flapper-news-token'];
+      return $window.localStorage['health-mg-token'];
     },
     isLoggedIn: function(){
       var token = auth.getToken();
@@ -135,37 +135,37 @@ function($stateProvider, $urlRouterProvider) {
       });
     },
     logOut: function(){
-      $window.localStorage.removeItem('flapper-news-token');
+      $window.localStorage.removeItem('health-mg-token');
     }
   };
 
   return auth;
 }])
-.controller('MainCtrl', [
-'$scope',
-'posts',
-'auth',
-function($scope, posts, auth){
-  $scope.test = 'Hello world!';
-
-  $scope.posts = posts.posts;
-  $scope.isLoggedIn = auth.isLoggedIn;
-
-  $scope.addPost = function(){
-    if($scope.title === '') { return; }
-    posts.create({
-      title: $scope.title,
-      link: $scope.link,
-    });
-    $scope.title = '';
-    $scope.link = '';
-  };
-
-  $scope.incrementUpvotes = function(post) {
-    posts.upvote(post);
-  };
-
-}])
+// .controller('MainCtrl', [
+// '$scope',
+// 'posts',
+// 'auth',
+// function($scope, posts, auth){
+//   $scope.test = 'Hello world!';
+//
+//   $scope.posts = posts.posts;
+//   $scope.isLoggedIn = auth.isLoggedIn;
+//
+//   $scope.addPost = function(){
+//     if($scope.title === '') { return; }
+//     posts.create({
+//       title: $scope.title,
+//       link: $scope.link,
+//     });
+//     $scope.title = '';
+//     $scope.link = '';
+//   };
+//
+//   $scope.incrementUpvotes = function(post) {
+//     posts.upvote(post);
+//   };
+//
+// }])
 
 //.controller('PostsCtrl', [
 //'$scope',
@@ -198,7 +198,6 @@ function($scope, posts, auth){
 'auth',
 function($scope, $state, auth){
   $scope.user = {};
-
   $scope.register = function(){
     auth.register($scope.user).error(function(error){
       $scope.error = error;

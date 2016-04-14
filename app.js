@@ -10,12 +10,15 @@ var passport = require('passport');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-mongoose.connect('mongodb://localhost/news');
+mongoose.connect('mongodb://localhost/HealthMG');
 
 //require('./models/Posts');
 //require('./models/Comments');
-require('./models/Users');
-require('./models/HeartRate');
+require('./models/Admins');
+require('./models/HeartRates');
+require('./models/Publishers');
+require('./models/Subscribers');
+require('./models/Subscriptions');
 
 require('./config/passport');
 

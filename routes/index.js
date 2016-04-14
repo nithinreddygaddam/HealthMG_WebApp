@@ -15,8 +15,10 @@ router.get('/', function(req, res) {
 var mongoose = require('mongoose');
 //var Post = mongoose.model('Post');
 //var Comment = mongoose.model('Comment');
-var User = mongoose.model('User');
+var Publisher = mongoose.model('Publisher');
+var Subscriber = mongoose.model('Subscriber');
 var HeartRate = mongoose.model('HeartRate');
+var Subscription = mongoose.model('Subscription');
 
 var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
@@ -30,7 +32,7 @@ io.on('connection', function(clientSocket){
   clientSocket.on('disconnect', function(){
     console.log('user disconnected');
   });
-//save hear rate to database
+//save heart rate to database
     clientSocket.on('heartRate', function(time, date, hr){
         var heartR = new HeartRate();
 
@@ -141,38 +143,73 @@ io.on('connection', function(clientSocket){
 
 
 router.post('/login', function(req, res, next){
-  if(!req.body.username || !req.body.password){
-    return res.status(400).json({message: 'Please fill out all fields'});
-  }
-
-  passport.authenticate('local', function(err, user, info){
-    if(err){ return next(err); }
-
-    if(user){
-      return res.json({token: user.generateJWT()});
-    } else {
-      return res.status(401).json(info);
+    if(!req.body.username || !req.body.password){
+        return res.status(400).json({message: 'Please fill out all fields'});
     }
-  })(req, res, next);
+    if(req.body.account = "subscriber" ) {
+        passport.authenticate('local', function (err, subscriber, info) {
+            if (err) {
+                return next(err);
+            }
+
+            if (subscriber) {
+                return res.json({token: subscriber.generateJWT()});
+            } else {
+                return res.status(401).json(info);
+            }
+        })(req, res, next);
+    }
+    else if(req.body.account = "publisher" ) {
+        passport.authenticate('local', function (err, publisher, info) {
+            if (err) {
+                return next(err);
+            }
+
+            if (publisher) {
+                return res.json({token: publisher.generateJWT()});
+            } else {
+                return res.status(401).json(info);
+            }
+        })(req, res, next);
+    }
 });
 
 router.post('/register', function(req, res, next){
   if(!req.body.username || !req.body.password){
     return res.status(400).json({message: 'Please fill out all fields'});
   }
+    
+    if(req.body.account == "subscriber" ) {
+        var subscriber = new Subscriber();
 
-  var user = new User();
+        subscriber.username = req.body.username;
 
-  user.username = req.body.username;
-    user.
+        subscriber.setPassword(req.body.password)
 
-  user.setPassword(req.body.password)
+        subscriber.save(function (err) {
+            if (err) {
+                return next(err);
+            }
 
-  user.save(function (err){
-    if(err){ return next(err); }
+            return res.json({token: subscriber.generateJWT()})
+        });
+    }
+    else if(req.body.account == "publisher" ){
+        var publisher = new Publisher();
 
-    return res.json({token: user.generateJWT()})
-  });
+        publisher.username = req.body.username;
+
+        publisher.setPassword(req.body.password)
+
+        publisher.save(function (err) {
+            if (err) {
+                return next(err);
+            }
+
+            return res.json({token: publisher.generateJWT()})
+        });
+    }
+    
 });
 
 module.exports = router;
