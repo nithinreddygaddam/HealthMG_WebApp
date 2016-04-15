@@ -11,7 +11,6 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Express' });
 });
 
-
 var mongoose = require('mongoose');
 //var Post = mongoose.model('Post');
 //var Comment = mongoose.model('Comment');
@@ -146,8 +145,9 @@ router.post('/login', function(req, res, next){
     if(!req.body.username || !req.body.password){
         return res.status(400).json({message: 'Please fill out all fields'});
     }
-    if(req.body.account = "subscriber" ) {
-        passport.authenticate('local', function (err, subscriber, info) {
+    
+    if(req.body.account == "subscriber" ) {
+        passport.authenticate('local-subscriber', function (err, subscriber, info) {
             if (err) {
                 return next(err);
             }
@@ -159,8 +159,9 @@ router.post('/login', function(req, res, next){
             }
         })(req, res, next);
     }
-    else if(req.body.account = "publisher" ) {
-        passport.authenticate('local', function (err, publisher, info) {
+    else if(req.body.account == "publisher" ) {
+
+        passport.authenticate('local-publisher', function (err, publisher, info) {
             if (err) {
                 return next(err);
             }
@@ -184,7 +185,7 @@ router.post('/register', function(req, res, next){
 
         subscriber.username = req.body.username;
 
-        subscriber.setPassword(req.body.password)
+        subscriber.setPassword(req.body.password);
 
         subscriber.save(function (err) {
             if (err) {
@@ -199,7 +200,7 @@ router.post('/register', function(req, res, next){
 
         publisher.username = req.body.username;
 
-        publisher.setPassword(req.body.password)
+        publisher.setPassword(req.body.password);
 
         publisher.save(function (err) {
             if (err) {
