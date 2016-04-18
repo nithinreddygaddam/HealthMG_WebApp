@@ -2,6 +2,7 @@
  * Created by Nithin on 4/11/16.
  */
 
+
 var mongoose = require('mongoose');
 
 var HeartRateSchema = new mongoose.Schema({
@@ -9,7 +10,7 @@ var HeartRateSchema = new mongoose.Schema({
     date: String,
     uuid: String,
     hearRate: Number,
-    Publisher: { type: mongoose.Schema.Types.ObjectId, ref: 'Publisher' }
+    publisher: { type: mongoose.Schema.Types.ObjectId, ref: 'Publisher' }
 });
 
 mongoose.model('HeartRate', HeartRateSchema);

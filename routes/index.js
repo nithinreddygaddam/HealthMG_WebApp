@@ -8,7 +8,7 @@ var io = require('socket.io')(http);
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+    res.render('index', { title: 'Express' });
 });
 
 var mongoose = require('mongoose');
@@ -22,15 +22,15 @@ var Subscription = mongoose.model('Subscription');
 var auth = jwt({secret: 'SECRET', userProperty: 'payload'});
 
 http.listen(4000, function(){
-  console.log('Listening on *:4000');
+    console.log('Listening on *:4000');
 });
 
 io.on('connection', function(clientSocket){
-  console.log('a user connected');
+    console.log('a user connected');
 
-  clientSocket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
+    clientSocket.on('disconnect', function(){
+        console.log('user disconnected');
+    });
 //save heart rate to database
     clientSocket.on('heartRate', function(time, date, hr){
         var heartR = new HeartRate();
@@ -42,11 +42,11 @@ io.on('connection', function(clientSocket){
         heartR.save(function (err){
             if(err){ return next(err); }
 
-
         });
     });
 
 });
+
 //router.get('/posts', function(req, res, next) {
 //  Post.find(function(err, posts){
 //    if(err){ return next(err); }
@@ -141,11 +141,123 @@ io.on('connection', function(clientSocket){
 //});
 
 
+router.get('/publisher/:username', function(req, res, next) {
+    var query = Publisher.findOne({'username': req.params.username});
+    query.exec(function (err, publisher){
+        if (err) { return next(err); }
+        if (!publisher) { return next(new Error("can't find publisher")); }
+        res.send(publisher);
+
+    });
+});
+
+router.get('/subscriptions', function(req, res, next) {
+    Subscription.find(function(err, subscriptions){
+        if(err){ return next(err); }
+
+        res.json(subscriptions);
+    });
+});
+
+//router.param('comment', function(req, res, next, id) {
+//  var query = Comment.findById(id);
+//
+//  query.exec(function (err, comment){
+//    if (err) { return next(err); }
+//    if (!comment) { return next(new Error("can't find comment")); }
+//
+//    req.comment = comment;
+//    return next();
+//  });
+//});
+
+router.post('/subscriptions', auth, function(req, res, next) {
+
+    // console.log(req.body);
+    // // console.log(req.body.subscription);
+
+
+    var subscription = new Subscription(req.body);
+
+    console.log(subscription);
+
+    var query = Subscriber.findById(req.body.subscriber);
+    var publisherUsername;
+    
+    query.exec(function (err, subscriber) {
+        if (err) {
+            return next(err);
+        }
+        if (!subscriber) {
+            return next(new Error("can't find subscriber"));
+        }
+        subscription.subscriber = subscriber;
+        console.log(subscriber._id);
+    });
+
+    var query2 = Publisher.findById(req.body.publisher);
+
+    query2.exec(function (err, publisher){
+        if (err) { return next(err); }
+        if (!publisher) { return next(new Error("can't find publisher")); }
+        subscription.publisher = publisher;
+        publisherUsername = publisher.username;
+        console.log(publisher._id);
+    });
+
+    // subscription.status = req.body.status;
+
+    console.log(subscription);
+
+    subscription.save(function(err,subscription) {
+        if(err) {
+            console.log(err);
+            res.send({
+                message :'something went wrong'
+            });
+        } else {
+            console.log('saved subscription');
+            // subscription.publisherUsername = publisherUsername;
+            console.log(subscription);
+            res.json(subscription);
+        }
+
+    });
+    // subscription.save(function(err, subscription){
+    //     if(err){ return next(err); }
+    //
+    //     res.json(subscription);
+    // });
+});
+
+
+// // Preload post objects on routes with ':subscription'
+// router.param('subscription', function(req, res, next, id) {
+//  var query = Subscription.findById(id);
+//
+//  query.exec(function (err, subscription){
+//    if (err) { return next(err); }
+//    if (!subscription) { return next(new Error("can't find subscription")); }
+//
+//    req.subscription = subscription;
+//    return next();
+//  });
+// });
+//
+// // return a subscription
+// router.get('/subscriptions/:subscription', function(req, res, next) {
+//  req.post.populate('comments', function(err, post) {
+//    res.json(post);
+//  });
+// });
+
+
+
 router.post('/login', function(req, res, next){
     if(!req.body.username || !req.body.password){
         return res.status(400).json({message: 'Please fill out all fields'});
     }
-    
+
     if(req.body.account == "subscriber" ) {
         passport.authenticate('local-subscriber', function (err, subscriber, info) {
             if (err) {
@@ -176,10 +288,10 @@ router.post('/login', function(req, res, next){
 });
 
 router.post('/register', function(req, res, next){
-  if(!req.body.username || !req.body.password){
-    return res.status(400).json({message: 'Please fill out all fields'});
-  }
-    
+    if(!req.body.username || !req.body.password){
+        return res.status(400).json({message: 'Please fill out all fields'});
+    }
+
     if(req.body.account == "subscriber" ) {
         var subscriber = new Subscriber();
 
@@ -210,7 +322,7 @@ router.post('/register', function(req, res, next){
             return res.json({token: publisher.generateJWT()})
         });
     }
-    
+
 });
 
 module.exports = router;

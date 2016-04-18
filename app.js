@@ -7,15 +7,11 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 
-
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-
 mongoose.connect('mongodb://localhost/HealthMG');
 
 //require('./models/Posts');
 //require('./models/Comments');
-require('./models/Admins');
+//require('./models/Admins');
 require('./models/HeartRates');
 require('./models/Publishers');
 require('./models/Subscribers');
@@ -26,6 +22,9 @@ require('./config/passport');
 var routes = require('./routes/index');
 
 var app = express();
+
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -55,7 +54,7 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
     app.use(function(err, req, res, next) {
-        console.log(err.stack);
+        console.log(err.stack)
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,

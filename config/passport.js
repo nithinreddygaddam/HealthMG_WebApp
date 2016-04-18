@@ -20,8 +20,6 @@ passport.use('local-subscriber', new LocalStrategy(
         }
         return done(null, subscriber);
       });
-
-    
     }
 
 ));

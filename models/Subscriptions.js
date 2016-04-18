@@ -2,14 +2,15 @@
  * Created by Nithin on 4/11/16.
  */
 
+
 var mongoose = require('mongoose');
 
 var SubscriptionSchema = new mongoose.Schema({
-    status:         { type: String, uppercase: true, enum: ['Active', 'Suspended'], default:'Active' },
-    Publisher:      { type: mongoose.Schema.Types.ObjectId, ref: 'Publisher' },
-    Subscriber:     { type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber' },
-    created_at:     { type: Date },
-    updated_at:     { type: Date }
+    status:         { type: String, uppercase: true, enum: ['ACTIVE', 'SUSPENDED'], default:'ACTIVE' },
+    publisher:      { type: mongoose.Schema.Types.ObjectId, ref: 'Publisher' },
+    subscriber:     { type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber' }
+    // created_at:     { type: Date },
+    // updated_at:     { type: Date }
 });
 
 SubscriptionSchema.pre('save', function(next){

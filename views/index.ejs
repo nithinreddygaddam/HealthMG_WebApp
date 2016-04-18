@@ -78,6 +78,52 @@
     <!--</div>-->
 </script>
 
+<script type="text/ng-template" id="/subscriber.html">
+    <div class="page-header">
+
+
+        <form ng-submit="addSubscription()" ng-show="isLoggedIn()"
+              style="margin-top:30px;">
+            <h3>Subscriber</h3>
+
+            <div class="form-group">
+                <input type="text"
+                       class="form-control"
+                       placeholder="Publisher's Username"
+                       ng-model="publisherUsername"></input>
+            </div>
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+        </form>
+    </div>
+
+    <!--<div ng-repeat="publisher in publishers">-->
+
+    <!--<span style="font-size:20px; margin-left:10px;">-->
+    <!--&lt;!&ndash;<a ng-show="post.link" href="{{post.link}}">&ndash;&gt;-->
+    <!--{{publisher.username}}-->
+    <!--</a>-->
+    <!--<span ng-hide="publisher._id">-->
+    <!--{{publisher.username}}-->
+    <!--</span>-->
+    <!--</span>-->
+    <!--<span ng-show="post.author">-->
+    <!--posted by {{post.author}} |-->
+    <!--</span>-->
+    <!--<span>-->
+    <!--<a href="#/posts/{{post._id}}">Comments</a>-->
+    <!--</span>-->
+    <!--</div>-->
+
+</script>
+
+<script type="text/ng-template" id="/publisher.html">
+    <div class="page-header">
+        <h1>Publisher</h1>
+    </div>
+
+
+</script>
+
 <!--<script type="text/ng-template" id="/posts.html">-->
 <!--<div class="page-header">-->
 <!--<h3>-->
@@ -186,20 +232,6 @@
     </form>
 </script>
 
-<script type="text/ng-template" id="/subscriber.html">
-    <div class="page-header">
-        <h1>Subscriber</h1>
-    </div>
-
-</script>
-
-<script type="text/ng-template" id="/publisher.html">
-    <div class="page-header">
-        <h1>Publisher</h1>
-    </div>
-
-
-</script>
 
 </body>
 </html>
