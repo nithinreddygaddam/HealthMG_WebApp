@@ -93,26 +93,28 @@
                        ng-model="publisherUsername"></input>
             </div>
             <button type="submit" class="btn btn-primary">Subscribe</button>
+
+
+            <div ng-repeat="publisher in publishers">
+
+    <span style="font-size:20px; margin-left:10px;">
+    <!--<a ng-show="post.link" href="{{post.link}}">-->
+    {{publisher.username}}
+        </a>
+    <span ng-hide="publisher._id">
+    {{publisher.username}}
+    </span>
+    </span>
+                <!--<span ng-show="post.author">-->
+                <!--posted by {{post.author}} |-->
+                <!--</span>-->
+    <span>
+    <a href="#/subscription/{{publisher._id}}">View</a>
+    </span>
+            </div>
+
         </form>
     </div>
-
-    <!--<div ng-repeat="publisher in publishers">-->
-
-    <!--<span style="font-size:20px; margin-left:10px;">-->
-    <!--&lt;!&ndash;<a ng-show="post.link" href="{{post.link}}">&ndash;&gt;-->
-    <!--{{publisher.username}}-->
-    <!--</a>-->
-    <!--<span ng-hide="publisher._id">-->
-    <!--{{publisher.username}}-->
-    <!--</span>-->
-    <!--</span>-->
-    <!--<span ng-show="post.author">-->
-    <!--posted by {{post.author}} |-->
-    <!--</span>-->
-    <!--<span>-->
-    <!--<a href="#/posts/{{post._id}}">Comments</a>-->
-    <!--</span>-->
-    <!--</div>-->
 
 </script>
 

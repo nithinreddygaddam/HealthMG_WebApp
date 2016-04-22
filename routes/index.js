@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var jwt = require('express-jwt');
 var passport = require('passport');
+var synchronize = require('synchronize');
 
 var http = require('http').Server(express);
 var io = require('socket.io')(http);
@@ -12,8 +13,7 @@ router.get('/', function(req, res) {
 });
 
 var mongoose = require('mongoose');
-//var Post = mongoose.model('Post');
-//var Comment = mongoose.model('Comment');
+//require('./models/Admins');
 var Publisher = mongoose.model('Publisher');
 var Subscriber = mongoose.model('Subscriber');
 var HeartRate = mongoose.model('HeartRate');
@@ -25,6 +25,7 @@ http.listen(4000, function(){
     console.log('Listening on *:4000');
 });
 
+// Socket code for interacting with the mobile app
 io.on('connection', function(clientSocket){
     console.log('a user connected');
 
@@ -47,99 +48,6 @@ io.on('connection', function(clientSocket){
 
 });
 
-//router.get('/posts', function(req, res, next) {
-//  Post.find(function(err, posts){
-//    if(err){ return next(err); }
-//
-//    res.json(posts);
-//  });
-//});
-//
-//router.post('/posts', auth, function(req, res, next) {
-//  var post = new Post(req.body);
-//  post.author = req.payload.username;
-//
-//  post.save(function(err, post){
-//    if(err){ return next(err); }
-//
-//    res.json(post);
-//  });
-//});
-//
-//
-//// Preload post objects on routes with ':post'
-//router.param('post', function(req, res, next, id) {
-//  var query = Post.findById(id);
-//
-//  query.exec(function (err, post){
-//    if (err) { return next(err); }
-//    if (!post) { return next(new Error("can't find post")); }
-//
-//    req.post = post;
-//    return next();
-//  });
-//});
-//
-//// Preload comment objects on routes with ':comment'
-//router.param('comment', function(req, res, next, id) {
-//  var query = Comment.findById(id);
-//
-//  query.exec(function (err, comment){
-//    if (err) { return next(err); }
-//    if (!comment) { return next(new Error("can't find comment")); }
-//
-//    req.comment = comment;
-//    return next();
-//  });
-//});
-//
-//
-//// return a post
-//router.get('/posts/:post', function(req, res, next) {
-//  req.post.populate('comments', function(err, post) {
-//    res.json(post);
-//  });
-//});
-//
-//
-//// upvote a post
-//router.put('/posts/:post/upvote', auth, function(req, res, next) {
-//  req.post.upvote(function(err, post){
-//    if (err) { return next(err); }
-//
-//    res.json(post);
-//  });
-//});
-//
-//
-//// create a new comment
-//router.post('/posts/:post/comments', auth, function(req, res, next) {
-//  var comment = new Comment(req.body);
-//  comment.post = req.post;
-//  comment.author = req.payload.username;
-//
-//  comment.save(function(err, comment){
-//    if(err){ return next(err); }
-//
-//    req.post.comments.push(comment);
-//    req.post.save(function(err, post) {
-//      if(err){ return next(err); }
-//
-//      res.json(comment);
-//    });
-//  });
-//});
-//
-//
-//// upvote a comment
-//router.put('/posts/:post/comments/:comment/upvote', auth, function(req, res, next) {
-//  req.comment.upvote(function(err, comment){
-//    if (err) { return next(err); }
-//
-//    res.json(comment);
-//  });
-//});
-
 
 router.get('/publisher/:username', function(req, res, next) {
     var query = Publisher.findOne({'username': req.params.username});
@@ -151,39 +59,52 @@ router.get('/publisher/:username', function(req, res, next) {
     });
 });
 
-router.get('/subscriptions', function(req, res, next) {
-    Subscription.find(function(err, subscriptions){
-        if(err){ return next(err); }
 
-        res.json(subscriptions);
+router.get('/subscriptions', function(req, res, next) {
+    console.log("get all");
+    var arrPublishers = [];
+    var itemsProcessed = 0;
+
+
+    Subscription.find(function(err, subscriptions) {
+        if (err) {
+            return next(err);
+        }
+        subscriptions.forEach( function(subscription) {
+
+            var query = Publisher.findById(subscription.publisher);
+            query.exec(function (err, publisher) {
+                if (err) {
+                    return next(err);
+                }
+                if (!publisher) {
+                    return next(new Error("can't find publisher"));
+                }
+                arrPublishers.push(publisher); 
+                itemsProcessed ++;
+
+                if( itemsProcessed == subscriptions.length){
+                    res.json(arrPublishers);
+                }
+
+            });
+
+        });
+
     });
+
+
 });
 
-//router.param('comment', function(req, res, next, id) {
-//  var query = Comment.findById(id);
-//
-//  query.exec(function (err, comment){
-//    if (err) { return next(err); }
-//    if (!comment) { return next(new Error("can't find comment")); }
-//
-//    req.comment = comment;
-//    return next();
-//  });
-//});
-
 router.post('/subscriptions', auth, function(req, res, next) {
-
-    // console.log(req.body);
-    // // console.log(req.body.subscription);
-
 
     var subscription = new Subscription(req.body);
 
     console.log(subscription);
 
     var query = Subscriber.findById(req.body.subscriber);
-    var publisherUsername;
-    
+    var publisherObject;
+
     query.exec(function (err, subscriber) {
         if (err) {
             return next(err);
@@ -201,11 +122,9 @@ router.post('/subscriptions', auth, function(req, res, next) {
         if (err) { return next(err); }
         if (!publisher) { return next(new Error("can't find publisher")); }
         subscription.publisher = publisher;
-        publisherUsername = publisher.username;
+        publisherObject = publisher;
         console.log(publisher._id);
     });
-
-    // subscription.status = req.body.status;
 
     console.log(subscription);
 
@@ -218,39 +137,13 @@ router.post('/subscriptions', auth, function(req, res, next) {
         } else {
             console.log('saved subscription');
             // subscription.publisherUsername = publisherUsername;
-            console.log(subscription);
-            res.json(subscription);
+            // console.log(subscription);
+            res.json(publisherObject);
         }
 
     });
-    // subscription.save(function(err, subscription){
-    //     if(err){ return next(err); }
-    //
-    //     res.json(subscription);
-    // });
+
 });
-
-
-// // Preload post objects on routes with ':subscription'
-// router.param('subscription', function(req, res, next, id) {
-//  var query = Subscription.findById(id);
-//
-//  query.exec(function (err, subscription){
-//    if (err) { return next(err); }
-//    if (!subscription) { return next(new Error("can't find subscription")); }
-//
-//    req.subscription = subscription;
-//    return next();
-//  });
-// });
-//
-// // return a subscription
-// router.get('/subscriptions/:subscription', function(req, res, next) {
-//  req.post.populate('comments', function(err, post) {
-//    res.json(post);
-//  });
-// });
-
 
 
 router.post('/login', function(req, res, next){
@@ -286,6 +179,7 @@ router.post('/login', function(req, res, next){
         })(req, res, next);
     }
 });
+
 
 router.post('/register', function(req, res, next){
     if(!req.body.username || !req.body.password){

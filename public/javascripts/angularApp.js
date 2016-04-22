@@ -45,7 +45,7 @@ angular.module('healthMG', ['ui.router'])
                     //     }]
                     // }
                     resolve: {
-                     postPromise: ['subscriptions', function(subscriptions){
+                     postPromise: ['subscriptions', function(subscriptions){    /////publishers********************************************
                        return subscriptions.getAll();
                      }]
                     }
@@ -73,7 +73,7 @@ angular.module('healthMG', ['ui.router'])
 
 angular.module('healthMG').factory('subscriptions', ['$http', 'auth', function($http, auth){
     var o = {
-        subscriptions: []
+        publishers: []
     };
 
     // o.get = function(id) {
@@ -84,7 +84,7 @@ angular.module('healthMG').factory('subscriptions', ['$http', 'auth', function($
 
     o.getAll = function() {
         return $http.get('/subscriptions').success(function(data){
-            angular.copy(data, o.subscriptions);
+            angular.copy(data, o.publishers);
         });
     };
 
@@ -92,7 +92,7 @@ angular.module('healthMG').factory('subscriptions', ['$http', 'auth', function($
         return $http.post('/subscriptions', subscription, {
             headers: {Authorization: 'Bearer '+auth.getToken()}
         }).success(function(data){
-            o.subscriptions.push(data);
+            o.publishers.push(data);
             // })
             // .error(function(error) {
             //     $scope.error = error;
@@ -108,7 +108,7 @@ angular.module('healthMG').controller('SubCtrl', [
     'subscriptions',
     'auth',
     function($scope, subscriptions, auth){
-        $scope.subscriptions = subscriptions.subscriptions;
+        $scope.publishers = subscriptions.publishers;
         $scope.isLoggedIn = auth.isLoggedIn;
         var publisherID;
 
@@ -137,107 +137,6 @@ angular.module('healthMG').controller('SubCtrl', [
         };
 
     }]);
-
-//.factory('posts', ['$http', 'auth', function($http, auth){
-//  var o = {
-//    posts: []
-//  };
-//
-//  o.get = function(id) {
-//    return $http.get('/posts/' + id).then(function(res){
-//      return res.data;
-//    });
-//  };
-//
-//  o.getAll = function() {
-//    return $http.get('/posts').success(function(data){
-//      angular.copy(data, o.posts);
-//    });
-//  };
-//
-//  o.create = function(post) {
-//    return $http.post('/posts', post, {
-//      headers: {Authorization: 'Bearer '+auth.getToken()}
-//    }).success(function(data){
-//      o.posts.push(data);
-//    });
-//  };
-//
-//  o.upvote = function(post) {
-//    return $http.put('/posts/' + post._id + '/upvote', {
-//      headers: {Authorization: 'Bearer '+auth.getToken()}
-//    }).success(function(data){
-//      post.upvotes += 1;
-//    });
-//  };
-//
-//  o.addComment = function(id, comment) {
-//    return $http.post('/posts/' + id + '/comments', comment, {
-//      headers: {Authorization: 'Bearer '+auth.getToken()}
-//    });
-//  };
-//
-//  o.upvoteComment = function(post, comment) {
-//    return $http.put('/posts/' + post._id + '/comments/'+ comment._id + '/upvote', {
-//      headers: {Authorization: 'Bearer '+auth.getToken()}
-//    }).success(function(data){
-//      comment.upvotes += 1;
-//    });
-//  };
-//
-//  return o;
-//}])
-
-// .controller('MainCtrl', [
-// '$scope',
-// 'posts',
-// 'auth',
-// function($scope, posts, auth){
-//   $scope.test = 'Hello world!';
-//
-//   $scope.posts = posts.posts;
-//   $scope.isLoggedIn = auth.isLoggedIn;
-//
-//   $scope.addPost = function(){
-//     if($scope.title === '') { return; }
-//     posts.create({
-//       title: $scope.title,
-//       link: $scope.link,
-//     });
-//     $scope.title = '';
-//     $scope.link = '';
-//   };
-//
-//   $scope.incrementUpvotes = function(post) {
-//     posts.upvote(post);
-//   };
-//
-// }])
-
-//.controller('PostsCtrl', [
-//'$scope',
-//'posts',
-//'post',
-//'auth',
-//function($scope, posts, post, auth){
-//  $scope.post = post;
-//  $scope.isLoggedIn = auth.isLoggedIn;
-//
-//  $scope.addComment = function(){
-//    if($scope.body === '') { return; }
-//    posts.addComment(post._id, {
-//      body: $scope.body,
-//      author: 'user',
-//    }).success(function(comment) {
-//      $scope.post.comments.push(comment);
-//    });
-//    $scope.body = '';
-//  };
-//
-//  $scope.incrementUpvotes = function(comment){
-//    posts.upvoteComment(post, comment);
-//  };
-//}])
 
 angular.module('healthMG').factory('auth', ['$http', '$window', '$rootScope', function($http, $window, $rootScope){
 

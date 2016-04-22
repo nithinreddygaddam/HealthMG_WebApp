@@ -6,11 +6,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var synchronize = require('synchronize');
 
 mongoose.connect('mongodb://localhost/HealthMG');
 
-//require('./models/Posts');
-//require('./models/Comments');
 //require('./models/Admins');
 require('./models/HeartRates');
 require('./models/Publishers');
