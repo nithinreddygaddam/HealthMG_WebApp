@@ -8,7 +8,7 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var synchronize = require('synchronize');
 
-mongoose.connect('mongodb://localhost/HealthMG');
+mongoose.connect('mongodb://localhost/HealthMG2');
 
 //require('./models/Admins');
 require('./models/HeartRates');

@@ -13,7 +13,6 @@ router.get('/', function(req, res) {
 });
 
 var mongoose = require('mongoose');
-//require('./models/Admins');
 var Publisher = mongoose.model('Publisher');
 var Subscriber = mongoose.model('Subscriber');
 var HeartRate = mongoose.model('HeartRate');
@@ -33,14 +32,15 @@ io.on('connection', function(clientSocket){
         console.log('user disconnected');
     });
 //save heart rate to database
-    clientSocket.on('heartRate', function(time, date, hr, uuid){
+    clientSocket.on('heartRate', function(timeStamp, date, time, hr, uuid, publisher){
         var heartR = new HeartRate();
 
+        heartR.timeStamp = timeStamp;
         heartR.time = time;
         heartR.date = date;
         heartR.heartRate = hr;
         heartR.uuid = uuid;
-        console.log(hr);
+        heartR.publisher = publisher;
         heartR.save(function (err){
             if(err){ return next(err); }
 
@@ -48,9 +48,6 @@ io.on('connection', function(clientSocket){
     });
 
     clientSocket.on('login', function(username, password){
-
-        var arrPublishers = [];
-        var itemsProcessed = 0;
 
         //plubisher here is a general user
 
@@ -60,15 +57,18 @@ io.on('connection', function(clientSocket){
             }
             if (!publisher) {
               io.emit("error", "Invalid username");
+              return next(err);
             }
             if (!publisher.validPassword(password)) {
               io.emit("error", "Invalid password");
+              return next(err);
             }
             console.log("User logged in");
             console.log(publisher);
 
             var user = publisher;
-            io.emit("successLogin", user);
+
+             io.emit("successLogin", user);
 
         });
 
@@ -105,44 +105,95 @@ io.on('connection', function(clientSocket){
 
     });
 
-    clientSocket.on('publishersList', function(_id){
+    clientSocket.on('getPublishersList', function(user){
 
         var arrPublishers = [];
         var itemsProcessed = 0;
 
+        console.log("Getting subscriptions");
+        console.log(user._id);
         //plubisher here is a general user
 
-            Subscription.find({subscriber: _id}), function (err, subscriptions) {
+var q = Subscription.find({subscriber: user._id});
+        q.exec(function (err, subscriptions) {
             if (err) {
+                console.log("error finding subscribers");
               return next(err);
             }
+            else{
+                if(subscriptions.length === 0){
+                    io.emit("successPubList", arrPublishers);
+                }
+                console.log("Found subscriptions");
+                console.log(subscriptions);
+                subscriptions.forEach( function(subscription) {
+                if(subscription.subscriber == user._id){
+                        var query = Publisher.findById(subscription.publisher);
+                        query.exec(function (err, publisher) {
+                            if (err) {
+                                return next(err);
+                            }
+                            if (!publisher) {
+                                return next(new Error("can't find user"));
+                            }
+                            arrPublishers.push(publisher); 
+                            itemsProcessed ++;
 
-            subscriptions.forEach( function(subscription) {
+                            if( itemsProcessed == subscriptions.length){
+                                console.log("User subscriptions");
+                               io.emit("successPubList", arrPublishers);
+                            }
 
-                var query = Publisher.findById(subscription.publisher);
-                query.exec(function (err, publisher) {
-                    if (err) {
-                        return next(err);
-                    }
-                    if (!publisher) {
-                        return next(new Error("can't find user"));
-                    }
-                    arrPublishers.push(publisher); 
-                    itemsProcessed ++;
+                        });
 
-                    if( itemsProcessed == subscriptions.length){
-                        console.log("User subscriptions");
-                       io.emit("successPubList", arrPublishers);
-                    }
+                }
 
                 });
 
-            });
-
+                
+            }
             
-          };
-
+            });
     });
+
+    clientSocket.on('getHeartRates', function(user){
+
+ var emptyFlag = 0;
+        console.log("Getting heart Rates");
+        console.log(user._id);
+
+        var q = HeartRate.find({publisher: user._id, date: "05/11"}).sort({timeStamp: -1});
+        q.exec(function(err, latestRecords) {
+        if (err) {
+            return next(err);
+        }
+        if (latestRecords.length === 0){
+            emptyFlag = 1;
+            console.log("Heart rate data empty for user")
+        }
+        // console.log(latestRecords);
+        io.emit("successHeartRates", latestRecords, emptyFlag);        
+        });
+    });
+
+    clientSocket.on('getLatestRecords', function(user){
+
+        console.log("Getting latest records");
+        var emptyFlag = 0;
+        var q = HeartRate.find({publisher: user._id}).limit(1).sort({timeStamp: -1});
+        q.exec(function(err, latestRecords) {
+        if (err) {
+            return next(err);
+        }
+        if (latestRecords.length === 0){
+            emptyFlag = 1;
+            console.log("Heart rate data empty for user")
+        }
+        console.log(latestRecords);
+        io.emit("successLatestRecords", latestRecords, emptyFlag);        
+        });
+    });
+
 
     clientSocket.on('addSubscription', function(_id, username){
 
@@ -150,6 +201,7 @@ io.on('connection', function(clientSocket){
 
         var subscription = new Subscription();
         var publisherObject;
+        // var itemsProcessed = 0;
 
         Publisher.findOne({username: username}, function (err, publisher) {
             if (err) { 
@@ -159,23 +211,23 @@ io.on('connection', function(clientSocket){
             subscription.publisher = publisher._id;
             subscription.subscriber = _id;
             subscription.active = 'ACTIVE';
+            // arrPublishers.push(publisher);
             publisherObject = publisher;
             console.log(publisher._id);
             console.log("Subscription: " + subscription);
+
+            subscription.save(function(err,subscription) {
+                if(err) {
+                    console.log(err);
+                    res.send({
+                        message :'something went wrong'
+                    });
+                } else {
+                    console.log('saved subscription');
+                    io.emit("successSubscribing", publisherObject);
+            }
         });
 
-        console.log(subscription);
-
-        subscription.save(function(err,subscription) {
-            if(err) {
-                console.log(err);
-                res.send({
-                    message :'something went wrong'
-                });
-            } else {
-                console.log('saved subscription');
-                io.emit("successSubscribing", publisherObject);
-            }
         });
     });
 

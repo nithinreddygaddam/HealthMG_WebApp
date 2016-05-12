@@ -7,11 +7,9 @@ var mongoose = require('mongoose');
 
 var SubscriptionSchema = new mongoose.Schema({
     status:         { type: String, uppercase: true, enum: ['ACTIVE', 'SUSPENDED'], default:'ACTIVE' },
-    publisher:      { type: mongoose.Schema.Types.ObjectId, ref: 'Publisher' },
-    subscriber:      { type: mongoose.Schema.Types.ObjectId, ref: 'Publisher' }
-    // subscriber:     { type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber' }
-    // created_at:     { type: Date },
-    // updated_at:     { type: Date }
+    publisher:      { type: String },
+    subscriber:      { type: String }
+
 });
 
 SubscriptionSchema.pre('save', function(next){
